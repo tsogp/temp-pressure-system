@@ -1,0 +1,10 @@
+{
+    "idf.pythonInstallPath": "/usr/bin/python3",
+    "[c]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "editor.formatOnSave": true
+}

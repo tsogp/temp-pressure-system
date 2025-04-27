@@ -1,0 +1,57 @@
+# STM32CubeMX generated files
+*.ioc
+*.bak
+*.log
+
+# Build output
+build/
+Debug/
+Release/
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+*.d
+*.o
+*.a
+
+# Cache
+.cache/
+
+# STM32CubeIDE
+.settings/
+.cproject
+.project
+.loadpath
+
+# Keil uVision
+*.uvopt*
+*.uvgui*
+*.bak
+
+# IAR Embedded Workbench
+*.ewp
+*.ewd
+*.ewt
+*.ewd2
+*.ewp2
+*.eww
+
+# CLion (if using with STM32)
+cmake-build-*/
+
+# Other generated folders
+Middlewares/
+Drivers/CMSIS/Device/ST/STM32*/Startup/
+
+# Optional - comment out if you want to keep auto-generated HAL/LL files
+# Drivers/STM32*/HAL_Driver/
+# Core/Src/
+# Core/Inc/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db

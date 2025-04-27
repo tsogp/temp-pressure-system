@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/tsogp/prog/c/embed/stm32/temp-pressure-system/cmake_install.cmake",
+		"/home/tsogp/prog/c/embed/stm32/temp-pressure-system/cmake/stm32cubemx/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
