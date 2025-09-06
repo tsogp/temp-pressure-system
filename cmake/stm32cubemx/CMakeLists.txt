@@ -6,9 +6,9 @@ add_library(stm32cubemx INTERFACE)
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)
 
-target_compile_definitions(stm32cubemx INTERFACE 
-	USE_HAL_DRIVER 
-	STM32F103xB
+target_compile_definitions(stm32cubemx INTERFACE
+    USE_HAL_DRIVER
+    STM32F103xB
     $<$<CONFIG:Debug>:DEBUG>
 )
 
@@ -22,7 +22,9 @@ target_include_directories(stm32cubemx INTERFACE
 
 target_sources(stm32cubemx INTERFACE
     ../../Core/Src/main.c
+    ../../Core/Src/dht.c
     ../../Core/Src/liquidcrystal_i2c.c
+
     # ../../Core/Src/.c
     ../../Core/Src/stm32f1xx_it.c
     ../../Core/Src/stm32f1xx_hal_msp.c
@@ -56,5 +58,3 @@ target_link_libraries(stm32cubemx INTERFACE
 if(CMAKE_C_STANDARD LESS 11)
     message(ERROR "Generated code requires C11 or higher")
 endif()
-
-
