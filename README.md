@@ -1,5 +1,7 @@
 # Temp-Pressure System
 
+![demo](https://github.com/tsogp/temp-pressure-system/blob/master/media/demo.gif)
+
 This project is a **sensor hub** system composed of two parts:  
 - **Client (STM32)**: Collects environmental and location data.  
 - **Server (ESP32)**: Receives, validates, and forwards data to an MQTT broker.  
