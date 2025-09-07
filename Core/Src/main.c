@@ -68,6 +68,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
+void Send_Data_To_ESP32(float temp, float hum, float lat, float lon) {
+	char msg[128];
+	int len = snprintf(msg, sizeof(msg), "{\"id\":1,\"temp\":%.2f,\"hum\":%.2f,\"lat\":%.6f,\"lon\":%.6f}\n", temp, hum,
+					   lat, lon);
+	HAL_UART_Transmit(&huart2, (uint8_t *)msg, len, HAL_MAX_DELAY);
+}
+
 void delay_us(uint16_t us) {
 	__HAL_TIM_SET_COUNTER(&htim1, 0); // set the counter value a 0
 	while (__HAL_TIM_GET_COUNTER(&htim1) < us)
@@ -136,6 +143,7 @@ int main(void) {
 	MX_I2C1_Init();
 	MX_TIM1_Init();
 	MX_USART1_UART_Init();
+	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 	HD44780_Init(2);
 	// HD44780_Clear();
@@ -159,6 +167,8 @@ int main(void) {
 		// Получение данных с датчика
 		DHT_data d = DHT_getData(&tempData);
 		// Отправка текста в UART
+
+		Send_Data_To_ESP32(d.temp, d.hum, GPS.dec_latitude, GPS.dec_longitude);
 
 		Display_Temp(d.temp);
 		Display_Rh(d.hum);
