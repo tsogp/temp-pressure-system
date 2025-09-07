@@ -58,3 +58,8 @@ Drivers/CMSIS/Device/ST/STM32*/Startup/
 
 # Windows
 Thumbs.db
+
+# VSCode
+compile_commands.json
+settings.json
+cmake_install.cmake
