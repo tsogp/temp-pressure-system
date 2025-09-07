@@ -40,6 +40,9 @@ Release/
 
 # CLion (if using with STM32)
 cmake-build-*/
+CMakeFiles/
+.idea/
+.cmake/
 
 # Other generated folders
 Middlewares/

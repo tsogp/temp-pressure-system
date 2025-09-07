@@ -35,7 +35,7 @@ rule C_COMPILER__temp-pressure-system_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__temp-pressure-system_Debug
-  command = $PRE_LINK && /usr/bin/arm-none-eabi-gcc $FLAGS -mcpu=cortex-m3  -T "/home/tsogp/prog/c/embed/stm32/temp-pressure-system/stm32f103c8tx_flash.ld" --specs=nano.specs -Wl,-Map=temp-pressure-system.map -Wl,--gc-sections -Wl,--start-group -lc -lm -Wl,--end-group -Wl,--print-memory-usage $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
+  command = $PRE_LINK && /usr/bin/arm-none-eabi-gcc $FLAGS -mcpu=cortex-m3  -T "/home/tsogp/prog/c/embed/stm32/temp-pressure-system/stm32f103c8tx_flash.ld" --specs=nano.specs -u _printf_float -Wl,-Map=temp-pressure-system.map -Wl,--gc-sections -Wl,--start-group -lc -lm -Wl,--end-group -Wl,--print-memory-usage $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -52,7 +52,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/bin/cmake --regenerate-during-build -S/home/tsogp/prog/c/embed/stm32/temp-pressure-system -B/home/tsogp/prog/c/embed/stm32/temp-pressure-system
+  command = /home/tsogp/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake --regenerate-during-build -S/home/tsogp/prog/c/embed/stm32/temp-pressure-system -B/home/tsogp/prog/c/embed/stm32/temp-pressure-system
   description = Re-running CMake...
   generator = 1
 
@@ -61,7 +61,7 @@ rule RERUN_CMAKE
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = /usr/bin/ninja $FILE_ARG -t clean $TARGETS
+  command = /home/tsogp/.local/share/JetBrains/Toolbox/apps/clion/bin/ninja/linux/x64/ninja $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -69,6 +69,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = /usr/bin/ninja -t targets
+  command = /home/tsogp/.local/share/JetBrains/Toolbox/apps/clion/bin/ninja/linux/x64/ninja -t targets
   description = All primary targets available:
 

@@ -17,10 +17,11 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "delay.h"
-#include "liquidcrystal_i2c.h"
 #include "dht.h"
+#include "liquidcrystal_i2c.h"
+#include "main.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -123,7 +124,7 @@ int main(void) {
 	// HD44780_SetCursor(10, 1);
 	HD44780_PrintStr("INITIALIZING");
 	HAL_Delay(2000);
-  HD44780_Clear();
+	HD44780_Clear();
 
 	// HD44780_Clear();
 	// HD44780_SetCursor(0, 0);

@@ -18,11 +18,15 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "dht.h"
-#include "string.h"
+#include "gpio.h"
+#include "i2c.h"
+#include "tim.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "dht.h"
+#include "gps.h"
 #include "liquidcrystal_i2c.h"
 #include "stdio.h"
 /* USER CODE END Includes */
@@ -44,9 +48,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
-
-TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 
@@ -54,15 +55,18 @@ TIM_HandleTypeDef htim1;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_I2C1_Init(void);
-static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart == &huart1) {
+		GPS_UART_CallBack();
+	}
+}
 
 void delay_us(uint16_t us) {
 	__HAL_TIM_SET_COUNTER(&htim1, 0); // set the counter value a 0
@@ -81,6 +85,21 @@ void Display_Rh(float Rh) {
 	char str[20] = {0};
 	HD44780_SetCursor(0, 1);
 	sprintf(str, "RH: %.2f", Rh);
+	HD44780_PrintStr(str);
+}
+
+void Display_Lati(float latitude) {
+	char str[20] = {0};
+	HD44780_Clear();
+	HD44780_SetCursor(0, 0);
+	sprintf(str, "Lati: %.2f", latitude);
+	HD44780_PrintStr(str);
+}
+
+void Display_Long(float longitude) {
+	char str[20] = {0};
+	HD44780_SetCursor(0, 1);
+	sprintf(str, "Long: %.2f", longitude);
 	HD44780_PrintStr(str);
 }
 
@@ -116,6 +135,7 @@ int main(void) {
 	MX_GPIO_Init();
 	MX_I2C1_Init();
 	MX_TIM1_Init();
+	MX_USART1_UART_Init();
 	/* USER CODE BEGIN 2 */
 	HD44780_Init(2);
 	// HD44780_Clear();
@@ -123,51 +143,11 @@ int main(void) {
 	HD44780_SetCursor(0, 0);
 	// HD44780_SetCursor(10, 1);
 	HD44780_PrintStr("INITIALIZING");
+	GPS_Init();
+	static DHT_sensor tempData = {GPIOB, GPIO_PIN_9, DHT22, GPIO_PULLUP};
 	HAL_Delay(2000);
 	HD44780_Clear();
 
-	static DHT_sensor bedRoom = {GPIOB, GPIO_PIN_9, DHT22, GPIO_PULLUP};
-
-	// HD44780_Clear();
-	// HD44780_SetCursor(0, 0);
-	// HD44780_PrintStr("HELLO");
-	// HAL_Delay(2000);
-	// HD44780_NoBacklight();
-	// HAL_Delay(2000);
-	// HD44780_Backlight();
-
-	// HAL_Delay(2000);
-	// HD44780_Cursor();
-	// HAL_Delay(2000);
-	// HD44780_Blink();
-	// HAL_Delay(5000);
-	// HD44780_NoBlink();
-	// HAL_Delay(2000);
-	// HD44780_NoCursor();
-	// HAL_Delay(2000);
-
-	// HD44780_NoDisplay();
-	// HAL_Delay(2000);
-	// HD44780_Display();
-
-	// HD44780_Clear();
-	// HD44780_SetCursor(0, 0);
-	// HD44780_PrintStr("Learning STM32 with LCD is fun :-)");
-	// int x;
-	// for (int x = 0; x < 40; x = x + 1) {
-	// 	HD44780_ScrollDisplayLeft(); // HD44780_ScrollDisplayRight();
-	// 	HAL_Delay(500);
-	// }
-
-	// char snum[5];
-	// for (int x = 1; x <= 200; x++) {
-	// 	itoa(x, snum, 10);
-	// 	HD44780_Clear();
-	// 	HD44780_SetCursor(0, 0);
-	// 	HD44780_PrintStr(snum);
-	// 	HAL_Delay(1000);
-	// }
-	// HD44780_Clear();
 	HAL_TIM_Base_Start(&htim1);
 	/* USER CODE END 2 */
 
@@ -177,14 +157,15 @@ int main(void) {
 		// Буффер для печати текста
 		char msg[40];
 		// Получение данных с датчика
-		DHT_data d = DHT_getData(&bedRoom);
-		// Печать данных в буффер
-		sprintf(msg, "\fBed room: Temp %2.1f°C, Hum %2.1f%%", d.temp, d.hum);
+		DHT_data d = DHT_getData(&tempData);
 		// Отправка текста в UART
 
 		Display_Temp(d.temp);
-		HAL_Delay(1000);
 		Display_Rh(d.hum);
+		HAL_Delay(1000);
+
+		Display_Lati(GPS.dec_latitude);
+		Display_Long(GPS.dec_longitude);
 		HAL_Delay(1000);
 
 		// HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // LED on
@@ -230,118 +211,6 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
 		Error_Handler();
 	}
-}
-
-/**
- * @brief I2C1 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_I2C1_Init(void) {
-
-	/* USER CODE BEGIN I2C1_Init 0 */
-
-	/* USER CODE END I2C1_Init 0 */
-
-	/* USER CODE BEGIN I2C1_Init 1 */
-
-	/* USER CODE END I2C1_Init 1 */
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 100000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
-		Error_Handler();
-	}
-	/* USER CODE BEGIN I2C1_Init 2 */
-
-	/* USER CODE END I2C1_Init 2 */
-}
-
-/**
- * @brief TIM1 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_TIM1_Init(void) {
-
-	/* USER CODE BEGIN TIM1_Init 0 */
-
-	/* USER CODE END TIM1_Init 0 */
-
-	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-	TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-	/* USER CODE BEGIN TIM1_Init 1 */
-
-	/* USER CODE END TIM1_Init 1 */
-	htim1.Instance = TIM1;
-	htim1.Init.Prescaler = 64 - 1;
-	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim1.Init.Period = 65535;
-	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim1.Init.RepetitionCounter = 0;
-	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_Base_Init(&htim1) != HAL_OK) {
-		Error_Handler();
-	}
-	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-	if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK) {
-		Error_Handler();
-	}
-	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK) {
-		Error_Handler();
-	}
-	/* USER CODE BEGIN TIM1_Init 2 */
-
-	/* USER CODE END TIM1_Init 2 */
-}
-
-/**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
-static void MX_GPIO_Init(void) {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	/* USER CODE BEGIN MX_GPIO_Init_1 */
-	/* USER CODE END MX_GPIO_Init_1 */
-
-	/* GPIO Ports Clock Enable */
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
-
-	/*Configure GPIO pin : ONBOARD_LED_Pin */
-	GPIO_InitStruct.Pin = ONBOARD_LED_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(ONBOARD_LED_GPIO_Port, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : PB9 */
-	GPIO_InitStruct.Pin = GPIO_PIN_9;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	/* USER CODE BEGIN MX_GPIO_Init_2 */
-	/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */

@@ -22,10 +22,13 @@ target_include_directories(stm32cubemx INTERFACE
 
 target_sources(stm32cubemx INTERFACE
     ../../Core/Src/main.c
+    ../../Core/Src/gpio.c
+    ../../Core/Src/i2c.c
+    ../../Core/Src/tim.c
+    ../../Core/Src/usart.c
     ../../Core/Src/dht.c
+    ../../Core/Src/gps.c
     ../../Core/Src/liquidcrystal_i2c.c
-
-    # ../../Core/Src/.c
     ../../Core/Src/stm32f1xx_it.c
     ../../Core/Src/stm32f1xx_hal_msp.c
     ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c
@@ -42,6 +45,7 @@ target_sources(stm32cubemx INTERFACE
     ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
     ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c
     ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c
+    ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c
     ../../Core/Src/system_stm32f1xx.c
     ../../Core/Src/sysmem.c
     ../../Core/Src/syscalls.c
